@@ -32,7 +32,7 @@ before_build:
   - cmake --version
 
 build_script:
-  - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX="C:\Software\message"
+  - cmake -H. -Bbuild -G"%GENERATOR%"
   - cmake --build build -- install %BUILDFLAGS%
 
 deploy: off
