@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
 
-project(recipe-03 CXX)
+project(message CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+message("CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}")
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "/usr/local/message" CACHE PATH "Install path" FORCE)
 endif()
