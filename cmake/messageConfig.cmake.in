@@ -156,9 +156,9 @@ if(NOT TARGET ${PN}::message)
     include("${CMAKE_CURRENT_LIST_DIR}/${PN}Targets-static.cmake")
   endif()
 
-  include(CMakeFindDependencyMacro)
   if(NOT TARGET PkgConfig::UUID)
-    find_dependency(PkgConfig::UUID)
+    find_package(PkgConfig REQUIRED QUIET)
+    pkg_search_module(UUID REQUIRED uuid IMPORTED_TARGET)
   endif()
 endif()
 
