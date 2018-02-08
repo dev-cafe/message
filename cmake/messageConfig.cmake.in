@@ -158,7 +158,7 @@ if(NOT TARGET ${PN}::message)
 
   include(CMakeFindDependencyMacro)
   if(NOT TARGET PkgConfig::UUID)
-    find_dependency(UUID)
+    find_dependency(PkgConfig::UUID)
   endif()
 endif()
 
