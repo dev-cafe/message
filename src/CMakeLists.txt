@@ -1,3 +1,9 @@
+find_package(PkgConfig REQUIRED QUIET)
+pkg_search_module(UUID REQUIRED uuid IMPORTED_TARGET)
+if(UUID_FOUND)
+  message(STATUS "Found libuuid")
+endif()
+
 add_library(message-objs OBJECT "")
 target_sources(message-objs
   PUBLIC
@@ -23,26 +29,32 @@ generate_export_header(message-objs
   DEFINE_NO_DEPRECATED
   )
 target_include_directories(message-objs
-  PRIVATE
+  PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
   )
 
 add_library(message-static STATIC $<TARGET_OBJECTS:message-objs>)
+target_link_libraries(message-static
+  PUBLIC
+    $<INSTALL_INTERFACE:PkgConfig::UUID>
+  )
 set_target_properties(message-static PROPERTIES
   COMPILE_DEFINITIONS message_STATIC_DEFINE
   OUTPUT_NAME "message"
   )
 
 add_library(message-shared SHARED $<TARGET_OBJECTS:message-objs>)
+target_link_libraries(message-shared
+  PUBLIC
+    PkgConfig::UUID
+  )
 set_target_properties(message-shared PROPERTIES
+  MACOSX_RPATH ON
   SOVERSION 1
-  CXX_VISIBILITY_PRESET hidden
-  VISIBILITY_INLINES_HIDDEN 1
   OUTPUT_NAME "message"
   )
 
 add_executable(hello-world hello-world.cpp)
-
 target_link_libraries(hello-world
   PUBLIC
     message-shared
@@ -61,13 +73,79 @@ set_target_properties(hello-world
     INSTALL_RPATH_USE_LINK_PATH ON
   )
 
-install(TARGETS hello-world message-static message-shared
+install(
+  TARGETS
+    hello-world
+  EXPORT
+    "messageTargets"
   RUNTIME DESTINATION
     ${CMAKE_INSTALL_BINDIR}
-  LIBRARY DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}
+  )
+
+install(
+  TARGETS
+    message-static
+  EXPORT
+    "messageTargets-static"
   ARCHIVE DESTINATION
     ${CMAKE_INSTALL_LIBDIR}
   )
 
+install(
+  TARGETS
+    message-shared
+  EXPORT
+    "messageTargets-shared"
+  LIBRARY DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}
+  )
+
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/messageExport.h Message.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/message)
+
+
+if(APPLE)
+  set_target_properties(message-shared PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+endif()
+target_compile_definitions(message-shared INTERFACE $<INSTALL_INTERFACE:USING_message>)
+target_include_directories(message-shared INTERFACE $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+target_compile_definitions(message-static INTERFACE $<INSTALL_INTERFACE:USING_message>)
+target_include_directories(message-static INTERFACE $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+set(CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_DATADIR}/cmake/message)
+install(
+  EXPORT
+    "messageTargets-shared"
+  NAMESPACE
+    "message::"
+  DESTINATION
+    ${CMAKECONFIG_INSTALL_DIR}
+  )
+
+install(
+  EXPORT
+    "messageTargets-static"
+  NAMESPACE
+    "message::"
+  DESTINATION
+    ${CMAKECONFIG_INSTALL_DIR}
+  )
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  ${PROJECT_SOURCE_DIR}/cmake/messageConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/messageConfig.cmake
+  INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+  )
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/messageConfigVersion.cmake
+  VERSION 1
+  COMPATIBILITY AnyNewerVersion
+  )
+install(
+  FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/messageConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/messageConfigVersion.cmake
+  DESTINATION
+    ${CMAKECONFIG_INSTALL_DIR}
+  )
