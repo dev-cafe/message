@@ -30,9 +30,9 @@
 # ::
 #
 # If message is found, this module defines the following :prop_tgt:`IMPORTED`
-# target. ::
-#
-#   message::message - the main message library with header & defs attached.
+# targets. ::
+#   message::message-shared - the main message shared library with header & defs attached.
+#   message::message-static - the main message static library with header & defs attached.
 #
 #
 # Suggested usage:

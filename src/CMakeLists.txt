@@ -4,6 +4,10 @@ if(UUID_FOUND)
   message(STATUS "Found libuuid")
 endif()
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
+set(CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_DATADIR}/cmake/message)
+
 add_library(message-objs OBJECT "")
 target_sources(message-objs
   PUBLIC
@@ -28,9 +32,12 @@ generate_export_header(message-objs
   NO_DEPRECATED_MACRO_NAME "message_NO_DEPRECATED"
   DEFINE_NO_DEPRECATED
   )
-target_include_directories(message-objs
-  PUBLIC
-    ${CMAKE_CURRENT_BINARY_DIR}
+install(
+  FILES
+    Message.hpp
+    ${CMAKE_CURRENT_BINARY_DIR}/messageExport.h
+  DESTINATION
+    ${CMAKE_INSTALL_INCLUDEDIR}/message
   )
 
 add_library(message-static STATIC $<TARGET_OBJECTS:message-objs>)
@@ -38,9 +45,35 @@ target_link_libraries(message-static
   PUBLIC
     $<INSTALL_INTERFACE:PkgConfig::UUID>
   )
+target_compile_definitions(message-static
+  INTERFACE
+    $<INSTALL_INTERFACE:USING_message>
+  )
+target_include_directories(message-static
+  INTERFACE
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  )
 set_target_properties(message-static PROPERTIES
   COMPILE_DEFINITIONS message_STATIC_DEFINE
   OUTPUT_NAME "message"
+  )
+install(
+  TARGETS
+    message-static
+  EXPORT
+    "messageTargets-static"
+  ARCHIVE DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}
+  INCLUDES DESTINATION
+    ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+install(
+  EXPORT
+    "messageTargets-static"
+  NAMESPACE
+    "message::"
+  DESTINATION
+    ${CMAKECONFIG_INSTALL_DIR}
   )
 
 add_library(message-shared SHARED $<TARGET_OBJECTS:message-objs>)
@@ -48,20 +81,36 @@ target_link_libraries(message-shared
   PUBLIC
     PkgConfig::UUID
   )
+target_compile_definitions(message-shared INTERFACE $<INSTALL_INTERFACE:USING_message>)
+target_include_directories(message-shared INTERFACE $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 set_target_properties(message-shared PROPERTIES
   MACOSX_RPATH ON
   SOVERSION 1
   OUTPUT_NAME "message"
+  )
+install(
+  TARGETS
+    message-shared
+  EXPORT
+    "messageTargets-shared"
+  LIBRARY DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}
+  INCLUDES DESTINATION
+    ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+install(
+  EXPORT
+    "messageTargets-shared"
+  NAMESPACE
+    "message::"
+  DESTINATION
+    ${CMAKECONFIG_INSTALL_DIR}
   )
 
 add_executable(hello-world hello-world.cpp)
 target_link_libraries(hello-world
   PUBLIC
     message-shared
-  )
-target_include_directories(hello-world
-  PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR}
   )
 
 set_target_properties(hello-world
@@ -82,66 +131,19 @@ install(
     ${CMAKE_INSTALL_BINDIR}
   )
 
-install(
-  TARGETS
-    message-static
-  EXPORT
-    "messageTargets-static"
-  ARCHIVE DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}
-  )
-
-install(
-  TARGETS
-    message-shared
-  EXPORT
-    "messageTargets-shared"
-  LIBRARY DESTINATION
-    ${CMAKE_INSTALL_LIBDIR}
-  )
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/messageExport.h Message.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/message)
-
-
-if(APPLE)
-  set_target_properties(message-shared PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-endif()
-target_compile_definitions(message-shared INTERFACE $<INSTALL_INTERFACE:USING_message>)
-target_include_directories(message-shared INTERFACE $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
-target_compile_definitions(message-static INTERFACE $<INSTALL_INTERFACE:USING_message>)
-target_include_directories(message-static INTERFACE $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
-set(CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_DATADIR}/cmake/message)
-install(
-  EXPORT
-    "messageTargets-shared"
-  NAMESPACE
-    "message::"
-  DESTINATION
-    ${CMAKECONFIG_INSTALL_DIR}
-  )
-
-install(
-  EXPORT
-    "messageTargets-static"
-  NAMESPACE
-    "message::"
-  DESTINATION
-    ${CMAKECONFIG_INSTALL_DIR}
-  )
-
 include(CMakePackageConfigHelpers)
-configure_package_config_file(
-  ${PROJECT_SOURCE_DIR}/cmake/messageConfig.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/messageConfig.cmake
-  INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR}
-  )
 write_basic_package_version_file(
   ${CMAKE_CURRENT_BINARY_DIR}/messageConfigVersion.cmake
   VERSION 1
   COMPATIBILITY AnyNewerVersion
   )
+
+configure_package_config_file(
+  ${PROJECT_SOURCE_DIR}/cmake/messageConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/messageConfig.cmake
+  INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+  )
+
 install(
   FILES
     ${CMAKE_CURRENT_BINARY_DIR}/messageConfig.cmake
