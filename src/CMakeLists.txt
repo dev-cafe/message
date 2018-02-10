@@ -43,7 +43,7 @@ install(
 add_library(message-static STATIC $<TARGET_OBJECTS:message-objs>)
 target_link_libraries(message-static
   PUBLIC
-    $<INSTALL_INTERFACE:PkgConfig::UUID>
+    PkgConfig::UUID
   )
 target_compile_definitions(message-static
   INTERFACE
