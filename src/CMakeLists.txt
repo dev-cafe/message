@@ -81,8 +81,14 @@ target_link_libraries(message-shared
   PUBLIC
     PkgConfig::UUID
   )
-target_compile_definitions(message-shared INTERFACE $<INSTALL_INTERFACE:USING_message>)
-target_include_directories(message-shared INTERFACE $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_compile_definitions(message-shared
+  INTERFACE
+    $<INSTALL_INTERFACE:USING_message>
+  )
+target_include_directories(message-shared
+  INTERFACE
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  )
 set_target_properties(message-shared PROPERTIES
   MACOSX_RPATH ON
   SOVERSION 1
@@ -112,7 +118,6 @@ target_link_libraries(hello-world
   PUBLIC
     message-shared
   )
-
 set_target_properties(hello-world
   PROPERTIES
     MACOSX_RPATH ON
@@ -121,7 +126,6 @@ set_target_properties(hello-world
     INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}"
     INSTALL_RPATH_USE_LINK_PATH ON
   )
-
 install(
   TARGETS
     hello-world
