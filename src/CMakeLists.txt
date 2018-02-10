@@ -146,8 +146,8 @@ install(
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
   ${CMAKE_CURRENT_BINARY_DIR}/messageConfigVersion.cmake
-  VERSION 1
-  COMPATIBILITY AnyNewerVersion
+  VERSION 1.0.0
+  COMPATIBILITY SameMajorVersion
   )
 
 configure_package_config_file(
