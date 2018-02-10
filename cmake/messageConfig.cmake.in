@@ -6,23 +6,8 @@
 #
 # ::
 #
-#   message_FOUND - true if message and all required components found on the system
+#   message_FOUND - true if message found on the system
 #   message_VERSION - message version in format Major.Minor.Release
-#   message_INCLUDE_DIRS - Directory where message/Message.hpp header is located.
-#   message_INCLUDE_DIR - same as DIRS
-#   message_DEFINITIONS: Definitions necessary to use message, namely USING_message.
-#   message_LIBRARIES - message library to link against.
-#   message_LIBRARY - same as LIBRARIES
-#   message_EXECUTABLE - path to message executable
-#
-#
-# Available components: shared static exe
-#
-# ::
-#
-#   shared - search for only shared library
-#   static - search for only static library
-#   exe - search for executable as well as library
 #
 #
 # Exported targets:
@@ -33,6 +18,7 @@
 # targets. ::
 #   message::message-shared - the main message shared library with header & defs attached.
 #   message::message-static - the main message static library with header & defs attached.
+#   message::message-hello-world - the hello-world program for the message.
 #
 #
 # Suggested usage:
@@ -40,7 +26,7 @@
 # ::
 #
 #   find_package(message)
-#   find_package(message 1.1.7 CONFIG REQUIRED COMPONENTS shared)
+#   find_package(message 1.1.7 CONFIG REQUIRED)
 #
 #
 # The following variables can be set to guide the search for this package:
@@ -55,110 +41,11 @@
 
 @PACKAGE_INIT@
 
-set(PN message)
-set(_valid_components
-  static
-  shared
-  exe
-  )
-
-# find includes
-unset(_temp_h CACHE)
-find_path(_temp_h
-  NAMES message/Message.hpp
-  PATHS ${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@
-  NO_DEFAULT_PATH
-  )
-if(_temp_h)
-  set(${PN}_INCLUDE_DIR "${_temp_h}")
-  set(${PN}_INCLUDE_DIRS ${${PN}_INCLUDE_DIR})
-else()
-  set(${PN}_FOUND 0)
-  if(NOT CMAKE_REQUIRED_QUIET)
-    message(STATUS "${PN}Config missing component: header (${PN}: ${_temp_h})")
-  endif()
+include("${CMAKE_CURRENT_LIST_DIR}/messageTargets-hello-world.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/messageTargets-shared.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/messageTargets-static.cmake")
+if(NOT TARGET PkgConfig::UUID)
+  find_package(PkgConfig REQUIRED QUIET)
+  pkg_search_module(UUID REQUIRED uuid IMPORTED_TARGET)
 endif()
-
-# find executable
-list(FIND ${PN}_FIND_COMPONENTS "exe" _seek_exe)
-unset(_temp_exe CACHE)
-find_program(_temp_exe
-  NAMES hello-world
-  PATHS ${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_BINDIR@
-  NO_DEFAULT_PATH
-  )
-if(_temp_exe)
-  set(${PN}_EXECUTABLE "{_temp_exe}")
-  if(_seek_exe GREATER -1)
-    set(${PN}_exe_FOUND 1)
-  endif()
-else()
-  if(_seek_exe GREATER -1)
-    if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS "${PN}Config missing component: executable (${PN}: ${_temp_exe})")
-    endif()
-  endif()
-endif()
-
-# find library: shared, static, or whichever
-set(_hold_library_suffixes ${CMAKE_FIND_LIBRARY_SUFFIXES})
-list(FIND ${PN}_FIND_COMPONENTS "shared" _seek_shared)
-list(FIND ${PN}_FIND_COMPONENTS "static" _seek_static)
-if(_seek_shared GREATER -1)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_SHARED_LIBRARY_SUFFIX})
-elseif(_seek_static GREATER -1)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
-endif()
-unset(_temp CACHE)
-find_library(_temp
-  NAMES message
-  PATHS ${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_LIBDIR@
-  NO_DEFAULT_PATH
-  )
-if(_temp)
-  set(${PN}_LIBRARY "${_temp}")
-  if(_seek_shared GREATER -1)
-    set(${PN}_shared_FOUND 1)
-  elseif(_seek_static GREATER -1)
-    set(${PN}_static_FOUND 1)
-  endif()
-else()
-  if(_seek_shared GREATER -1)
-    if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS "${PN}Config missing component: shared library (${PN}: ${_temp})")
-    endif()
-  elseif(_seek_static GREATER -1)
-    if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS "${PN}Config missing component: static library (${PN}: ${_temp})")
-    endif()
-  else()
-    set(${PN}_FOUND 0)
-    if(NOT CMAKE_REQUIRED_QUIET)
-      message(STATUS "${PN}Config missing component: library (${PN}: ${_temp})")
-    endif()
-  endif()
-endif()
-set(CMAKE_FIND_LIBRARY_SUFFIXES ${_hold_library_suffixes})
-set(${PN}_LIBRARIES ${${PN}_LIBRARY})
-set(${PN}_DEFINITIONS USING_${PN})
-
-check_required_components(${PN})
-
-#-----------------------------------------------------------------------------
-# Don't include targets if this file is being picked up by another
-# project which has already built this as a subproject
-#-----------------------------------------------------------------------------
-if(NOT TARGET ${PN}::message)
-  get_filename_component(_fext ${${PN}_LIBRARY} EXT)
-  if(${_fext} STREQUAL ${CMAKE_SHARED_LIBRARY_SUFFIX})
-    include("${CMAKE_CURRENT_LIST_DIR}/${PN}Targets-shared.cmake")
-  else()
-    include("${CMAKE_CURRENT_LIST_DIR}/${PN}Targets-static.cmake")
-  endif()
-
-  if(NOT TARGET PkgConfig::UUID)
-    find_package(PkgConfig REQUIRED QUIET)
-    pkg_search_module(UUID REQUIRED uuid IMPORTED_TARGET)
-  endif()
-endif()
-
+check_required_components("message")

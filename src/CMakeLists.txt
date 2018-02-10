@@ -126,9 +126,17 @@ install(
   TARGETS
     hello-world
   EXPORT
-    "messageTargets"
+    "messageTargets-hello-world"
   RUNTIME DESTINATION
     ${CMAKE_INSTALL_BINDIR}
+  )
+install(
+  EXPORT
+    "messageTargets-hello-world"
+  NAMESPACE
+    "message::"
+  DESTINATION
+    ${CMAKECONFIG_INSTALL_DIR}
   )
 
 include(CMakePackageConfigHelpers)
