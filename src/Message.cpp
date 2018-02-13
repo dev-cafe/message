@@ -2,7 +2,10 @@
 
 #include <iostream>
 #include <string>
+
+#ifndef EXCLUDE_UUID
 #include <uuid/uuid.h>
+#endif
 
 std::ostream &Message::printObject(std::ostream &os) {
   os << "This is my very nice message: " << std::endl;
