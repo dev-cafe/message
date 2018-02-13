@@ -44,7 +44,11 @@
 include("${CMAKE_CURRENT_LIST_DIR}/messageTargets-hello-world.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/messageTargets-shared.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/messageTargets-static.cmake")
-if(NOT TARGET PkgConfig::UUID)
-  find_package(PkgConfig REQUIRED QUIET)
-  pkg_search_module(UUID REQUIRED uuid IMPORTED_TARGET)
+
+# Remove dependency on UUID if on Windows
+if(NOT WIN32)
+  if(NOT TARGET PkgConfig::UUID)
+    find_package(PkgConfig REQUIRED QUIET)
+    pkg_search_module(UUID REQUIRED uuid IMPORTED_TARGET)
+  endif()
 endif()

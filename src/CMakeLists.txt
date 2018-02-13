@@ -1,9 +1,3 @@
-find_package(PkgConfig REQUIRED QUIET)
-pkg_search_module(UUID REQUIRED uuid IMPORTED_TARGET)
-if(UUID_FOUND)
-  message(STATUS "Found libuuid")
-endif()
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 set(CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_DATADIR}/cmake/message)
@@ -20,6 +14,20 @@ set_target_properties(message-objs PROPERTIES
   CXX_VISIBILITY_PRESET hidden
   VISIBILITY_INLINES_HIDDEN 1
   )
+# Remove dependency on UUID if on Windows
+if(WIN32)
+  target_compile_definitions(message-objs
+    PUBLIC
+      EXCLUDE_UUID
+    )
+else()
+  find_package(PkgConfig REQUIRED QUIET)
+  pkg_search_module(UUID REQUIRED uuid IMPORTED_TARGET)
+  if(UUID_FOUND)
+    message(STATUS "Found libuuid")
+  endif()
+endif()
+
 
 include(GenerateExportHeader)
 generate_export_header(message-objs
@@ -43,7 +51,7 @@ install(
 add_library(message-static STATIC $<TARGET_OBJECTS:message-objs>)
 target_link_libraries(message-static
   PUBLIC
-    PkgConfig::UUID
+    $<$<NOT:$<BOOL:${WIN32}>>:PkgConfig::UUID>
   )
 target_compile_definitions(message-static
   INTERFACE
@@ -79,7 +87,7 @@ install(
 add_library(message-shared SHARED $<TARGET_OBJECTS:message-objs>)
 target_link_libraries(message-shared
   PUBLIC
-    PkgConfig::UUID
+    $<$<NOT:$<BOOL:${WIN32}>>:PkgConfig::UUID>
   )
 target_compile_definitions(message-shared
   INTERFACE
@@ -166,13 +174,15 @@ install(
 
 set(CPACK_PACKAGE_NAME "message")
 set(CPACK_PACKAGE_VENDOR "CMakeRecipes")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/INSTALL.rst")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/INSTALL.md")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "message: a small messaging library")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_VERSION_MAJOR "1")
 set(CPACK_PACKAGE_VERSION_MINOR "0")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
-set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 set(CPACK_SOURCE_IGNORE_FILES "/build/;/.git/;.gitignore;/external/")
+
+set(CPACK_GENERATOR "CygwinBinary;NSIS")
+set(CPACK_SOURCE_GENERATOR "ZIP;TGZ;CygwinSource")
 
 include(CPack)
