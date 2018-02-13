@@ -34,22 +34,22 @@ before_build:
 build_script:
   - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\Software\message
   - IF "%GENERATOR%"=="Visual Studio 14 2015" (
-    cmake --build build --target help.vcxproj
+    cmake --build build --target HELP
     ) ELSE (
     cmake --build build --target help
     )
   - IF "%GENERATOR%"=="Visual Studio 14 2015" (
-    cmake --build build --target install.vcxproj -- %BUILDFLAGS%
+    cmake --build build --target INSTALL -- %BUILDFLAGS%
     ) ELSE (
     cmake --build build --target install -- %BUILDFLAGS%
     )
   - IF "%GENERATOR%"=="Visual Studio 14 2015" (
-    cmake --build build --target package_source.vcxproj -- %BUILDFLAGS%
+    cmake --build build --target PACKAGE_SOURCE -- %BUILDFLAGS%
     ) ELSE (
     cmake --build build --target package_source %BUILDFLAGS%
     )
   - IF "%GENERATOR%"=="Visual Studio 14 2015" (
-    cmake --build build --target package.vcxproj -- %BUILDFLAGS%
+    cmake --build build --target PACKAGE -- %BUILDFLAGS%
     ) ELSE (
     cmake --build build --target package %BUILDFLAGS%
     )
