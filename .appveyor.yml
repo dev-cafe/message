@@ -46,12 +46,12 @@ build_script:
   - IF "%GENERATOR%"=="Visual Studio 14 2015" (
     cmake --build build --target PACKAGE_SOURCE -- %BUILDFLAGS%
     ) ELSE (
-    cmake --build build --target package_source %BUILDFLAGS%
+    cmake --build build --target package_source -- %BUILDFLAGS%
     )
   - IF "%GENERATOR%"=="Visual Studio 14 2015" (
     cmake --build build --target PACKAGE -- %BUILDFLAGS%
     ) ELSE (
-    cmake --build build --target package %BUILDFLAGS%
+    cmake --build build --target package -- %BUILDFLAGS%
     )
 
 deploy: off
