@@ -33,9 +33,25 @@ before_build:
 
 build_script:
   - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\Software\message
-  - if %GENERATOR%=="Visual Studio 14 2015" (cmake --build build --target help.vcxproj) else (cmake --build build --target help)
-  - if %GENERATOR%=="Visual Studio 14 2015" (cmake --build build --target install.vcxproj -- %BUILDFLAGS%) else (cmake --build build --target install -- %BUILDFLAGS%)
-  - if %GENERATOR%=="Visual Studio 14 2015" (cmake --build build --target package_source.vcxproj -- %BUILDFLAGS%) else (cmake --build build --target package_source %BUILDFLAGS%)
-  - if %GENERATOR%=="Visual Studio 14 2015" (cmake --build build --target package.vcxproj -- %BUILDFLAGS%) else (cmake --build build --target package %BUILDFLAGS%)
+  - IF "%GENERATOR%"=="Visual Studio 14 2015" (
+    cmake --build build --target help.vcxproj
+    ) ELSE (
+    cmake --build build --target help
+    )
+  - IF "%GENERATOR%"=="Visual Studio 14 2015" (
+    cmake --build build --target install.vcxproj -- %BUILDFLAGS%
+    ) ELSE (
+    cmake --build build --target install -- %BUILDFLAGS%
+    )
+  - IF "%GENERATOR%"=="Visual Studio 14 2015" (
+    cmake --build build --target package_source.vcxproj -- %BUILDFLAGS%
+    ) ELSE (
+    cmake --build build --target package_source %BUILDFLAGS%
+    )
+  - IF "%GENERATOR%"=="Visual Studio 14 2015" (
+    cmake --build build --target package.vcxproj -- %BUILDFLAGS%
+    ) ELSE (
+    cmake --build build --target package %BUILDFLAGS%
+    )
 
 deploy: off
