@@ -33,6 +33,6 @@ before_build:
 
 build_script:
   - cmake -H. -Bbuild -G"%GENERATOR%"
-  - cmake --build build -- install %BUILDFLAGS%
+  - cmake --build build --target install package_source -- %BUILDFLAGS%
 
 deploy: off
