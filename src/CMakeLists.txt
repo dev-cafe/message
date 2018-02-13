@@ -107,6 +107,8 @@ install(
     message-shared
   EXPORT
     "messageTargets-shared"
+  RUNTIME DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION
     ${CMAKE_INSTALL_LIBDIR}
   INCLUDES DESTINATION
