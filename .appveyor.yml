@@ -25,18 +25,21 @@ environment:
       GENERATOR: "Visual Studio 14 2015"
       BUILDFLAGS: "/verbosity:normal"
       CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/projects/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    - platform: cygwin64
+      GENERATOR: "Unix Makefiles"
+      BUILDFLAGS: "VERBOSE=1"
+      CMAKARGS: ""
 
 init:
   # Workaround for CMake not wanting sh.exe on PATH for MinGW
   - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
   - set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
-  - set PATH=C:\MinGW\bin;%PATH%
+  - IF "%GENERATOR%"=="MinGW Makefiles" set PATH=C:\MinGW\bin;%PATH%
+  - IF "%GENERATOR%"=="Unix Makefiles" set PATH=C:\cygwin64\bin;C:\cygwin64\usr\bin;%PATH%
   - mkdir C:\projects\software
   - mkdir C:\projects\deps
 
 install:
-  # Install GFortran
-  #- mingw-get install fortran
   # Install dependencies in C:\projects\deps
   - cd C:\projects\deps
   # Install Kitware-maintained Ninja
@@ -56,7 +59,6 @@ before_build:
 
 build_script:
   - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\projects\software\message %CMAKEARGS%
-  - cmake --build build --target help
   - cmake --build build --target install -- %BUILDFLAGS%
   - cmake --build build --target package_source -- %BUILDFLAGS%
   - cmake --build build --target package -- %BUILDFLAGS%
