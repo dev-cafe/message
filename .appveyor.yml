@@ -46,8 +46,8 @@ install:
   - set PATH=%PATH%;C:\projects\deps\ninja
   - git clone https://github.com/Microsoft/vcpkg
   - cd vcpkg
-  - IF "%GENERATOR%"=="%Visual Studio 14 2015%" powershell -exec bypass scripts\bootstrap.ps1
-  - IF "%GENERATOR%"=="%Visual Studio 14 2015%" vcpkg integrate install
+  - IF "%GENERATOR%"=="Visual Studio 14 2015" powershell -exec bypass scripts\bootstrap.ps1
+  - IF "%GENERATOR%"=="Visual Studio 14 2015" vcpkg integrate install
   #- IF "%GENERATOR%"=="%Visual Studio 14 2015%" vcpkg install boost msmpi hdf5 fftw3
 
 before_build:
