@@ -5,44 +5,38 @@
 # http://blogs.msdn.com/b/vcblog/archive/2011/01/05/damn-my-vc-project-is-building-slower-in-vs2010-what-do-i-do-now-a-step-by-step-guide.aspx
 version: 'build_{build}-{branch}'
 
-platform: x86
+image:
+  - Visual Studio 2015
 
 build:
   parallel: true
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+    - platform: x86
       GENERATOR: "MinGW Makefiles"
       BUILDFLAGS: "VERBOSE=1"
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
-      GENERATOR: "Unix Makefiles"
-      BUILDFLAGS: "VERBOSE=1"
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
-      GENERATOR: "MSYS Makefiles"
-      BUILDFLAGS: "VERBOSE=1"
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      CMAKARGS: ""
+    - platform: x86
       GENERATOR: "Ninja"
       BUILDFLAGS: "-v"
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      CMAKARGS: ""
+    - platform: x86
       GENERATOR: "Visual Studio 14 2015"
       BUILDFLAGS: "/verbosity:normal"
+      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:\projects\deps\vcpkg\scripts\buildsystems\vcpkg.cmake"
 
 init:
   # Workaround for CMake not wanting sh.exe on PATH for MinGW
   - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
   - set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
-  - dir C:\cygwin64
-  - dir C:\msys64
   - set PATH=C:\MinGW\bin;%PATH%
-  - set PATH=C:\cygwin64;%PATH%
-  - set PATH=C:\msys64;%PATH%
   - mkdir C:\projects\software
   - mkdir C:\projects\deps
 
 install:
   # Install GFortran
-  - mingw-get install fortran
+  #- mingw-get install fortran
   # Install dependencies in C:\projects\deps
   - cd C:\projects\deps
   # Install Kitware-maintained Ninja
@@ -50,32 +44,21 @@ install:
   - appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
   - 7z e ninja.zip -oC:\projects\deps\ninja > nul
   - set PATH=%PATH%;C:\projects\deps\ninja
+  - git clone https://github.com/Microsoft/vcpkg
+  - cd vcpkg
+  - IF "%GENERATOR%"=="%Visual Studio 14 2015%" powershell -exec bypass scripts\bootstrap.ps1
+  - IF "%GENERATOR%"=="%Visual Studio 14 2015%" vcpkg integrate install
+  #- IF "%GENERATOR%"=="%Visual Studio 14 2015%" vcpkg install boost msmpi hdf5 fftw3
 
 before_build:
   - cd %APPVEYOR_BUILD_FOLDER%
   - cmake --version
 
 build_script:
-  - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\projects\software\message
-  - IF "%GENERATOR%"=="Visual Studio 14 2015" (
-    cmake --build build --target HELP
-    ) ELSE (
-    cmake --build build --target help
-    )
-  - IF "%GENERATOR%"=="Visual Studio 14 2015" (
-    cmake --build build --target INSTALL -- %BUILDFLAGS%
-    ) ELSE (
-    cmake --build build --target install -- %BUILDFLAGS%
-    )
-  - IF "%GENERATOR%"=="Visual Studio 14 2015" (
-    cmake --build build --target PACKAGE_SOURCE -- %BUILDFLAGS%
-    ) ELSE (
-    cmake --build build --target package_source -- %BUILDFLAGS%
-    )
-  - IF "%GENERATOR%"=="Visual Studio 14 2015" (
-    cmake --build build --target PACKAGE -- %BUILDFLAGS%
-    ) ELSE (
-    cmake --build build --target package -- %BUILDFLAGS%
-    )
+  - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\projects\software\message %CMAKEARGS%
+  - cmake --build build --target help
+  - cmake --build build --target install -- %BUILDFLAGS%
+  - cmake --build build --target package_source -- %BUILDFLAGS%
+  - cmake --build build --target package -- %BUILDFLAGS%
 
 deploy: off
