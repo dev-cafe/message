@@ -7,6 +7,8 @@ version: 'build_{build}-{branch}'
 
 image:
   - Visual Studio 2015
+  - Visual Studio 2017
+clone_folder: c:\projects\message
 
 build:
   parallel: true
@@ -55,7 +57,7 @@ install:
   #- IF "%GENERATOR%"=="%Visual Studio 14 2015%" vcpkg install boost msmpi hdf5 fftw3
 
 before_build:
-  - cd %APPVEYOR_BUILD_FOLDER%
+  - cd c:\projects\message
   - cmake --version
 
 build_script:
