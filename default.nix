@@ -4,7 +4,7 @@ let
     owner = "NixOS";
     repo = "nixpkgs-channels";
     rev = "nixos-unstable";
-    sha256 = "1zcbvzxk1vyk4ngfdyss8mlb3mqp050ygpnwqny0bxbzlqkrc4bh";
+    sha256 = "126701b11dx4rk9343ak7xl2sg5qr966jfj1n733jmvsgqc1di4l";
   });
 in
   with import nixpkgs {
@@ -17,10 +17,12 @@ in
     name = "message";
     buildInputs = [
       cmake
+      dpkg
       gcc
       libuuid
       ninja
       pkgconfig
+      rpm
     ];
     src = null;
     shellHook = ''

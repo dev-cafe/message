@@ -5,9 +5,6 @@
 # http://blogs.msdn.com/b/vcblog/archive/2011/01/05/damn-my-vc-project-is-building-slower-in-vs2010-what-do-i-do-now-a-step-by-step-guide.aspx
 version: 'build_{build}-{branch}'
 
-image:
-  - Visual Studio 2015
-
 platform: x86
 
 build:
@@ -15,10 +12,18 @@ build:
 
 environment:
   matrix:
-    - GENERATOR: "Visual Studio 14 2015"
-      BUILDFLAGS: "/verbosity:normal"
-    - GENERATOR: "MinGW Makefiles"
+    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      GENERATOR: "MinGW Makefiles"
       BUILDFLAGS: "VERBOSE=1"
+    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      GENERATOR: "Unix Makefiles"
+      BUILDFLAGS: "VERBOSE=1"
+    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      GENERATOR: "MSYS Makefiles"
+      BUILDFLAGS: "VERBOSE=1"
+    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      GENERATOR: "Visual Studio 14 2015"
+      BUILDFLAGS: "/verbosity:normal"
 
 init:
   # Workaround for CMake not wanting sh.exe on PATH for MinGW
