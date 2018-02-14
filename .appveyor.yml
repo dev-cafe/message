@@ -15,30 +15,26 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
       GENERATOR: "MinGW Makefiles"
       BUILDFLAGS: "VERBOSE=1"
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
-      GENERATOR: "Unix Makefiles"
-      BUILDFLAGS: "VERBOSE=1"
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
-      GENERATOR: "MSYS Makefiles"
-      BUILDFLAGS: "VERBOSE=1"
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
-      GENERATOR: "Ninja"
-      BUILDFLAGS: "-v"
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
-      GENERATOR: "Visual Studio 14 2015"
-      BUILDFLAGS: "/verbosity:normal"
+      #- APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      #- GENERATOR: "Unix Makefiles"
+      #- BUILDFLAGS: "VERBOSE=1"
+    - #- APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      #- GENERATOR: "MSYS Makefiles"
+      #- BUILDFLAGS: "VERBOSE=1"
+    - #- APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      #- GENERATOR: "Ninja"
+      #- BUILDFLAGS: "-v"
+    - #- APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      #- GENERATOR: "Visual Studio 14 2015"
+      #- BUILDFLAGS: "/verbosity:normal"
 
 init:
   # Workaround for CMake not wanting sh.exe on PATH for MinGW
   - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
   - set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
-  - dir C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1
-  - dir C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\bin
   - dir C:\cygwin64
-  - dir C:\cygwin64\bin
   - dir C:\msys64
-  - dir C:\msys64\bin
-  - set PATH=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1;%PATH%
+  - set PATH=C:\MinGW\bin;%PATH%
   - set PATH=C:\cygwin64;%PATH%
   - set PATH=C:\msys64;%PATH%
   - mkdir C:\projects\software
