@@ -24,7 +24,7 @@ environment:
     - platform: x86
       GENERATOR: "Visual Studio 14 2015"
       BUILDFLAGS: "/verbosity:normal"
-      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:\projects\deps\\vcpkg\scripts\\buildsystems\\vcpkg.cmake"
+      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/projects/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
 init:
   # Workaround for CMake not wanting sh.exe on PATH for MinGW
