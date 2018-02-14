@@ -22,6 +22,9 @@ environment:
       GENERATOR: "MSYS Makefiles"
       BUILDFLAGS: "VERBOSE=1"
     - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
+      GENERATOR: "Ninja"
+      BUILDFLAGS: "-v"
+    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2015"
       GENERATOR: "Visual Studio 14 2015"
       BUILDFLAGS: "/verbosity:normal"
 
@@ -29,15 +32,29 @@ init:
   # Workaround for CMake not wanting sh.exe on PATH for MinGW
   - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
   - set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
-  - set PATH=C:\MinGW\bin;%PATH%
-  - mkdir C:\Software
+  - set PATH=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1;%PATH%
+  - set PATH=C:\cygwin64;%PATH%
+  - set PATH=C:\msys64;%PATH%
+  - mkdir C:\projects\software
+  - mkdir C:\projects\deps
+
+install:
+  # Install GFortran
+  - mingw-get install fortran
+  # Install dependencies in C:\projects\deps
+  - cd C:\projects\deps
+  # Install Kitware-maintained Ninja
+  - set NINJA_URL="https://github.com/Kitware/ninja/releases/download/v1.7.2.gaad58.kitware.dyndep-1/ninja-1.7.2.gaad58.kitware.dyndep-1_i686-pc-windows-msvc.zip"
+  - appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
+  - 7z e ninja.zip -oC:\projects\deps\ninja > nul
+  - set PATH=%PATH%;C:\projects\deps\ninja
 
 before_build:
   - cd %APPVEYOR_BUILD_FOLDER%
   - cmake --version
 
 build_script:
-  - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\Software\message
+  - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\projects\software\message
   - IF "%GENERATOR%"=="Visual Studio 14 2015" (
     cmake --build build --target HELP
     ) ELSE (
