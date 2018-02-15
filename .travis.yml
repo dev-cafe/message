@@ -12,6 +12,7 @@ matrix:
             - g++-7
             - uuid-dev
             - pkg-config
+            - rpm
       env:
         - GENERATOR="Unix Makefiles"
         - BUILDFLAGS="VERBOSE=1"

@@ -201,7 +201,6 @@ list(APPEND CPACK_GENERATOR
   $<$<BOOL:${APPLE}>:DMG>
   $<$<BOOL:${LINUX}>:DEB;RPM>
   )
-
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 
 include(CPack)
