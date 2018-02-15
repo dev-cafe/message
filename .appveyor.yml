@@ -35,19 +35,10 @@ environment:
 
 init:
   # Workaround for CMake not wanting sh.exe on PATH for MinGW
-  - IF "%GENERATOR%"=="MinGW Makefiles" (
-      set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
-      set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
-      set PATH=C:\MinGW\bin;%PATH%
-    )
-  - IF "%GENERATOR%"=="Ninja" (
-      set PATH=C:\MinGW\bin;%PATH%
-    )
-    #- IF "%GENERATOR%"=="Unix Makefiles" (
-    #-   set PATH=C:\cygwin\bin;C:\cygwin\usr\bin;%PATH%
-    #-   set PATH=C:\Program Files (x86)\Git\bin;%PATH%
-    #-   set PATH=C:\Program Files\Git\usr\bin;%PATH%
-    #- )
+  - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
+  - set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
+  - IF "%GENERATOR%"=="MinGW Makefiles" set PATH=C:\MinGW\bin;%PATH%
+  - IF "%GENERATOR%"=="Ninja" set PATH=C:\MinGW\bin;%PATH%
   - mkdir C:\projects\software
   - mkdir C:\projects\deps
 
