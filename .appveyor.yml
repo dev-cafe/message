@@ -5,9 +5,7 @@
 # http://blogs.msdn.com/b/vcblog/archive/2011/01/05/damn-my-vc-project-is-building-slower-in-vs2010-what-do-i-do-now-a-step-by-step-guide.aspx
 version: 'build_{build}-{branch}'
 
-image:
-  - Visual Studio 2015
-  - Visual Studio 2017
+image: Visual Studio 2015
 clone_folder: c:\projects\message
 
 build:
