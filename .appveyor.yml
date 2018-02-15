@@ -5,30 +5,33 @@
 # http://blogs.msdn.com/b/vcblog/archive/2011/01/05/damn-my-vc-project-is-building-slower-in-vs2010-what-do-i-do-now-a-step-by-step-guide.aspx
 version: 'build_{build}-{branch}'
 
-image: Visual Studio 2015
-clone_folder: c:\projects\message
+platform: x86
 
 build:
   parallel: true
 
 environment:
   matrix:
-    - platform: x86
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       GENERATOR: "MinGW Makefiles"
       BUILDFLAGS: "VERBOSE=1"
       CMAKARGS: ""
-    - platform: x86
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       GENERATOR: "Ninja"
       BUILDFLAGS: "-v"
       CMAKARGS: ""
-    - platform: x86
-      GENERATOR: "Visual Studio 14 2015"
-      BUILDFLAGS: "/verbosity:normal"
-      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/projects/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
-    - platform: cygwin64
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       GENERATOR: "Unix Makefiles"
       BUILDFLAGS: "VERBOSE=1"
       CMAKARGS: ""
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      GENERATOR: "Visual Studio 14 2015"
+      BUILDFLAGS: "/verbosity:normal"
+      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/projects/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      GENERATOR: "Visual Studio 15 2017"
+      BUILDFLAGS: "/verbosity:normal"
+      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/projects/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
 init:
   # Workaround for CMake not wanting sh.exe on PATH for MinGW
@@ -36,7 +39,7 @@ init:
   - set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
   - IF "%GENERATOR%"=="MinGW Makefiles" set PATH=C:\MinGW\bin;%PATH%
   - IF "%GENERATOR%"=="Ninja" set PATH=C:\MinGW\bin;%PATH%
-  - IF "%GENERATOR%"=="Unix Makefiles" set PATH=C:\cygwin64\bin;C:\cygwin64\usr\bin;%PATH%
+  - IF "%GENERATOR%"=="Unix Makefiles" set PATH=C:\cygwin\bin;C:\cygwin\usr\bin;%PATH%
   - mkdir C:\projects\software
   - mkdir C:\projects\deps
 
@@ -52,6 +55,8 @@ install:
   - cd vcpkg
   - IF "%GENERATOR%"=="Visual Studio 14 2015" powershell -exec bypass scripts\bootstrap.ps1
   - IF "%GENERATOR%"=="Visual Studio 14 2015" vcpkg integrate install
+  - IF "%GENERATOR%"=="Visual Studio 15 2017" powershell -exec bypass scripts\bootstrap.ps1
+  - IF "%GENERATOR%"=="Visual Studio 15 2017" vcpkg integrate install
   #- IF "%GENERATOR%"=="%Visual Studio 14 2015%" vcpkg install boost msmpi hdf5 fftw3
 
 before_build:

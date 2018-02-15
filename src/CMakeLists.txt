@@ -2,12 +2,10 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 set(CMAKECONFIG_INSTALL_DIR ${CMAKE_INSTALL_DATADIR}/cmake/message)
 
-add_library(message-objs OBJECT "")
+add_library(message-objs OBJECT Message.cpp)
 target_sources(message-objs
   PUBLIC
     Message.hpp
-  PRIVATE
-    Message.cpp
   )
 set_target_properties(message-objs PROPERTIES
   POSITION_INDEPENDENT_CODE 1
