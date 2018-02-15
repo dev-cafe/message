@@ -16,18 +16,18 @@ environment:
       GENERATOR: "MinGW Makefiles"
       BUILDFLAGS: "VERBOSE=1"
       CMAKARGS: ""
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       GENERATOR: "Ninja"
       BUILDFLAGS: "-v"
-      CMAKARGS: ""
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      GENERATOR: "Unix Makefiles"
-      BUILDFLAGS: "VERBOSE=1"
       CMAKARGS: ""
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       GENERATOR: "Visual Studio 14 2015"
       BUILDFLAGS: "/verbosity:normal"
       CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/projects/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      GENERATOR: "Unix Makefiles"
+      BUILDFLAGS: "VERBOSE=1"
+      CMAKARGS: ""
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       GENERATOR: "Visual Studio 15 2017"
       BUILDFLAGS: "/verbosity:normal"
@@ -35,7 +35,7 @@ environment:
 
 init:
   - IF "%GENERATOR%"=="MinGW Makefiles" set PATH=C:\MinGW\bin;%PATH%
-  - IF "%GENERATOR%"=="Ninja" set PATH=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\bin;%PATH%
+  - IF "%GENERATOR%"=="Ninja" set PATH=C:\MinGW\bin;%PATH%
   - IF "%GENERATOR%"=="Unix Makefiles" set PATH=C:\cygwin\bin;C:\cygwin\usr\bin;%PATH%
   - mkdir C:\projects\software
   - mkdir C:\projects\deps
