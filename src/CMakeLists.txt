@@ -188,7 +188,20 @@ set(CPACK_PACKAGE_VERSION_MINOR "0")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_SOURCE_IGNORE_FILES "/build/;/.git/;.gitignore;/external/")
 
-set(CPACK_GENERATOR "NSIS")
+set(LINUX FALSE)
+if(UNIX)
+  if(CMAKE_SYSTEM_NAME MATCHES Linux)
+    set(LINUX TRUE)
+  endif*()
+endif()
+set(CPACK_GENERATOR "ZIP;TGZ")
+list(APPEND CPACK_GENERATOR
+  $<$<BOOL:${WIN32}>:NSIS>
+  $<$<BOOL:${MINGW}>:NSIS>
+  $<$<BOOL:${APPLE}>:DMG>
+  $<$<BOOL:${LINUX}>:DEB;RPM>
+  )
+
 set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
 
 include(CPack)

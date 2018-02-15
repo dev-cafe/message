@@ -1,0 +1,65 @@
+language: cpp
+sudo: false
+dist: trusty
+matrix:
+  include:
+    - os: linux
+      addons: &1
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+            - uuid-dev
+            - pkg-config
+      env:
+        - GENERATOR="Unix Makefiles"
+        - BUILDFLAGS="VERBOSE=1"
+    - os: linux
+      addons: *1
+      env:
+        - GENERATOR="Ninja"
+        - BUILDFLAGS="-v"
+    - os: osx
+      env:
+        - GENERATOR="Unix Makefiles"
+        - BUILDFLAGS="VERBOSE=1"
+    - os: osx
+      env:
+        - GENERATOR="Ninja"
+        - BUILDFLAGS="-v"
+
+cache:
+  pip: true
+  directories:
+    - $HOME/Deps/cmake
+    - $HOME/Deps/ninja
+
+env:
+  global:
+    - PATH=$HOME/Deps/cmake/bin:$HOME/Deps/ninja${PATH:+:$PATH}
+    - LD_LIBRARY_PATH=$HOME/Deps/hdf5/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+
+before_install:
+  # Dependencies are downloaded in $HOME/Downloads and installed in $HOME/Deps
+  - mkdir -p $HOME/Downloads $HOME/Deps
+
+install:
+  - ./.scripts/install_deps.sh
+  - ls $HOME/Deps/cmake
+  - ls $HOME/Deps/ninja
+  - echo $PATH
+  - echo $LD_LIBRARY_PATH
+
+before_script:
+  - test -n $CC && unset CC
+  - test -n $CXX && unset CXX
+  - test -n $FC && unset FC
+
+script:
+  - ./.scripts/report_versions.sh
+  - cmake -H. -Bbuild -G"$GENERATOR" -DCMAKE_INSTALL_PREFIX=$HOME/Software/message
+  - cmake --build build --target help -- $BUILDFLAGS
+  - cmake --build build --target install -- $BUILDFLAGS
+  - cmake --build build --target package_source -- $BUILDFLAGS
+  - cmake --build build --target package -- $BUILDFLAGS
