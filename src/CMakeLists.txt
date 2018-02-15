@@ -17,6 +17,7 @@ if(WIN32)
   target_compile_definitions(message-objs
     PUBLIC
       EXCLUDE_UUID
+      message_objs_EXPORTS
     )
 else()
   find_package(PkgConfig REQUIRED QUIET)
@@ -24,6 +25,10 @@ else()
   if(UUID_FOUND)
     message(STATUS "Found libuuid")
   endif()
+  target_compile_definitions(message-objs
+    PUBLIC
+      message_objs_EXPORTS
+    )
 endif()
 
 
@@ -54,13 +59,14 @@ target_link_libraries(message-static
 target_compile_definitions(message-static
   INTERFACE
     $<INSTALL_INTERFACE:USING_message>
+  PRIVATE
+    message_STATIC_DEFINE
   )
 target_include_directories(message-static
   INTERFACE
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
 set_target_properties(message-static PROPERTIES
-  COMPILE_DEFINITIONS message_STATIC_DEFINE
   OUTPUT_NAME "message"
   )
 install(
@@ -96,7 +102,6 @@ target_include_directories(message-shared
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
 set_target_properties(message-shared PROPERTIES
-  COMPILE_DEFINITIONS message_objs_EXPORTS
   MACOSX_RPATH ON
   SOVERSION 1
   OUTPUT_NAME "message"
