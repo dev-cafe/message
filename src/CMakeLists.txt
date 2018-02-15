@@ -192,7 +192,7 @@ set(LINUX FALSE)
 if(UNIX)
   if(CMAKE_SYSTEM_NAME MATCHES Linux)
     set(LINUX TRUE)
-  endif*()
+  endif()
 endif()
 set(CPACK_GENERATOR "ZIP;TGZ")
 list(APPEND CPACK_GENERATOR
