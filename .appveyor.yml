@@ -25,10 +25,6 @@ environment:
       BUILDFLAGS: "/verbosity:normal"
       CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/projects/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      GENERATOR: "Unix Makefiles"
-      BUILDFLAGS: "VERBOSE=1"
-      CMAKARGS: ""
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       GENERATOR: "Visual Studio 15 2017"
       BUILDFLAGS: "/verbosity:normal"
       CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/projects/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"

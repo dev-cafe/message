@@ -96,6 +96,7 @@ target_include_directories(message-shared
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
 set_target_properties(message-shared PROPERTIES
+  COMPILE_DEFINITIONS message_objs_EXPORTS
   MACOSX_RPATH ON
   SOVERSION 1
   OUTPUT_NAME "message"
