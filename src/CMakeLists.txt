@@ -102,6 +102,7 @@ target_compile_definitions(message-shared
   )
 target_include_directories(message-shared
   INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
   )
 set_target_properties(message-shared
@@ -140,10 +141,11 @@ install(
 add_executable(hello-world hello-world.cpp)
 target_link_libraries(hello-world
   PUBLIC
-    message-static
+    message-shared
   )
-# Remove overabundant /
-file(TO_NATIVE_PATH "${_rpath}${INSTALL_LIBDIR}" message_RPATH)
+# RPATH fixing
+file(RELATIVE_PATH _rel ${CMAKE_INSTALL_PREFIX} ${INSTALL_LIBDIR})
+file(TO_NATIVE_PATH "${_rpath}${_rel}" message_RPATH)
 set_target_properties(hello-world
   PROPERTIES
     MACOSX_RPATH ON
