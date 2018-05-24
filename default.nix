@@ -3,8 +3,8 @@ let
   nixpkgs = (hostPkgs.fetchFromGitHub {
     owner = "NixOS";
     repo = "nixpkgs-channels";
-    rev = "nixos-unstable";
-    sha256 = "1p0xxyz30bd2bg0wrfviqgsskz00w647h0l2vi33w90i42k8r3li";
+    rev = "nixos-18.03";
+    sha256 = "1q32p61l2y8wcrc8q01k364xsmfpfygbxawwkby3dh199zyhwl6r";
   });
 in
   with import nixpkgs {
@@ -24,6 +24,7 @@ in
       pkgconfig
       rpm
     ];
+    hardeningDisable = [ "all" ];
     src = null;
     shellHook = ''
     export NINJA_STATUS="[Built edge %f of %t in %e sec]"

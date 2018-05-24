@@ -3,64 +3,63 @@
 
 # Speeding up a Visual Studio build.
 # http://blogs.msdn.com/b/vcblog/archive/2011/01/05/damn-my-vc-project-is-building-slower-in-vs2010-what-do-i-do-now-a-step-by-step-guide.aspx
-version: 'build_{build}-{branch}'
+version: 'build-{build}-{branch}'
 
-platform: x86
+platform: x64
 
 build:
   parallel: true
 
 environment:
+  # Create expected SHELL variable for pipenv.
+  SHELL: "windows"
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      GENERATOR: "MinGW Makefiles"
-      BUILDFLAGS: "VERBOSE=1"
-      CMAKARGS: ""
+      MSYSTEM: MINGW64
+      GENERATOR: "Visual Studio 14 2015 Win64"
+      BUILDFLAGS: "/verbosity:normal"
+      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake"
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      MSYSTEM: MINGW64
+      GENERATOR: "MSYS Makefiles"
+      BUILDFLAGS: "VERBOSE=1"
+      CMAKEARGS: ""
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      MSYSTEM: MINGW64
+      GENERATOR: "Visual Studio 15 2017 Win64"
+      BUILDFLAGS: "/verbosity:normal"
+      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      MSYSTEM: MINGW64
       GENERATOR: "Ninja"
       BUILDFLAGS: "-v"
-      CMAKARGS: ""
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      GENERATOR: "Visual Studio 14 2015"
-      BUILDFLAGS: "/verbosity:normal"
-      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/projects/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      GENERATOR: "Visual Studio 15 2017"
-      BUILDFLAGS: "/verbosity:normal"
-      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/projects/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      CMAKEARGS: ""
 
 init:
-  # Workaround for CMake not wanting sh.exe on PATH for MinGW
-  - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
-  - set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
-  - IF "%GENERATOR%"=="MinGW Makefiles" set PATH=C:\MinGW\bin;%PATH%
-  - IF "%GENERATOR%"=="Ninja" set PATH=C:\MinGW\bin;%PATH%
-  - mkdir C:\projects\software
-  - mkdir C:\projects\deps
+  - set PATH=C:\msys64\%MSYSTEM%\bin;C:\msys64\usr\bin;%PATH%
+  - set PATH=C:\Python36;C:\Python36\Scripts;%PATH%
+  # Remove Python 2.7 from path
+  - set PATH=%PATH:C:\Python27;=%
+  - set PATH=%PATH:C:\Python27\Scripts;=%
 
 install:
-  # Install dependencies in C:\projects\deps
-  - cd C:\projects\deps
-  # Install Kitware-maintained Ninja
-  - set NINJA_URL="https://github.com/Kitware/ninja/releases/download/v1.7.2.gaad58.kitware.dyndep-1/ninja-1.7.2.gaad58.kitware.dyndep-1_i686-pc-windows-msvc.zip"
-  - appveyor DownloadFile %NINJA_URL% -FileName ninja.zip
-  - 7z e ninja.zip -oC:\projects\deps\ninja > nul
-  - set PATH=%PATH%;C:\projects\deps\ninja
-  - git clone https://github.com/Microsoft/vcpkg
-  - cd vcpkg
-  - IF "%GENERATOR%"=="Visual Studio 14 2015" powershell -exec bypass scripts\bootstrap.ps1
-  - IF "%GENERATOR%"=="Visual Studio 14 2015" vcpkg integrate install
-  - IF "%GENERATOR%"=="Visual Studio 15 2017" powershell -exec bypass scripts\bootstrap.ps1
-  - IF "%GENERATOR%"=="Visual Studio 15 2017" vcpkg integrate install
-  #- IF "%GENERATOR%"=="%Visual Studio 14 2015%" vcpkg install boost msmpi hdf5 fftw3
+  - '%APPVEYOR_BUILD_FOLDER%\.scripts\install.bat'
 
 before_build:
   - cd c:\projects\message
+  - python --version
   - cmake --version
 
 build_script:
   - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\projects\software\message %CMAKEARGS%
+  #- cmake --build build --target test -- %BUILDFLAGS%
   - cmake --build build --target install -- %BUILDFLAGS%
+  - cmake --build build --target package_source -- %BUILDFLAGS%
   - cmake --build build --target package -- %BUILDFLAGS%
 
 deploy: off
+
+cache:
+  - C:\msys64\%MSYSTEM%\bin -> install.bat
+  - C:\msys64\usr\bin -> install.bat
+  - c:\tools\vcpkg\installed\ -> install.bat

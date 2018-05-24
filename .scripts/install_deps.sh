@@ -3,7 +3,7 @@
 set -euo pipefail
 
 Ninja_URL=""
-CMake_VERSION="3.10.2"
+CMake_VERSION="3.11.2"
 CMake_URL=""
 # OS-dependent operations
 if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
