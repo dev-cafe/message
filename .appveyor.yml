@@ -54,7 +54,6 @@ build_script:
   - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\projects\software\message %CMAKEARGS%
   #- cmake --build build --target test -- %BUILDFLAGS%
   - cmake --build build --target install -- %BUILDFLAGS%
-  - cmake --build build --target package_source -- %BUILDFLAGS%
   - cmake --build build --target package -- %BUILDFLAGS%
 
 deploy: off

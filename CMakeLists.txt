@@ -36,21 +36,20 @@ else()
 endif()
 set(INSTALL_CMAKEDIR ${DEF_INSTALL_CMAKEDIR} CACHE PATH "Installation directory for CMake files")
 
-# Make relative paths absolute (needed later on)
-foreach(p IN ITEMS LIB BIN INCLUDE CMAKE)
-  set(var INSTALL_${p}DIR)
-  if(NOT IS_ABSOLUTE "${${var}}")
-    set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-  endif()
-  message(STATUS "Installing ${p} in ${${var}}")
+# Report to user
+foreach(p LIB BIN INCLUDE CMAKE)
+  file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_${p}DIR} _path )
+  message(STATUS "Installing ${p} to ${_path}")
+  unset(_path)
 endforeach()
 
 # Prepare RPATH
-file(RELATIVE_PATH _rel ${INSTALL_BINDIR} ${CMAKE_INSTALL_PREFIX})
+file(RELATIVE_PATH _rel ${CMAKE_INSTALL_PREFIX}/${INSTALL_BINDIR} ${CMAKE_INSTALL_PREFIX})
 if(APPLE)
   set(_rpath "@loader_path/${_rel}")
 else()
   set(_rpath "\$ORIGIN/${_rel}")
 endif()
+file(TO_NATIVE_PATH "${_rpath}/${INSTALL_LIBDIR}" message_RPATH)
 
 add_subdirectory(src)

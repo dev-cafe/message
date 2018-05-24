@@ -144,8 +144,6 @@ target_link_libraries(hello-world
     message-shared
   )
 # RPATH fixing
-file(RELATIVE_PATH _rel ${CMAKE_INSTALL_PREFIX} ${INSTALL_LIBDIR})
-file(TO_NATIVE_PATH "${_rpath}${_rel}" message_RPATH)
 set_target_properties(hello-world
   PROPERTIES
     MACOSX_RPATH ON
@@ -231,7 +229,9 @@ endif()
 if(APPLE)
   list(APPEND CPACK_GENERATOR "Bundle")
   set(CPACK_BUNDLE_NAME "message")
-  list(APPEND CPACK_GENERATOR "DMG")
+  configure_file(${PROJECT_SOURCE_DIR}/cmake/Info.plist.in Info.plist @ONLY)
+  set(CPACK_BUNDLE_PLIST ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
+  set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/cmake/coffee.icns)
 endif()
 message(STATUS "CPack generators: ${CPACK_GENERATOR}")
 
