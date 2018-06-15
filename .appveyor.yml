@@ -19,21 +19,25 @@ environment:
       GENERATOR: "Visual Studio 14 2015 Win64"
       BUILDFLAGS: "/verbosity:normal"
       CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      TESTING_TARGET: "RUN_TESTS"
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       MSYSTEM: MINGW64
       GENERATOR: "MSYS Makefiles"
       BUILDFLAGS: "VERBOSE=1"
       CMAKEARGS: ""
+      TESTING_TARGET: "test"
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       MSYSTEM: MINGW64
       GENERATOR: "Visual Studio 15 2017 Win64"
       BUILDFLAGS: "/verbosity:normal"
       CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      TESTING_TARGET: "RUN_TESTS"
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       MSYSTEM: MINGW64
       GENERATOR: "Ninja"
       BUILDFLAGS: "-v"
       CMAKEARGS: ""
+      TESTING_TARGET: "test"
 
 init:
   - set PATH=C:\msys64\%MSYSTEM%\bin;C:\msys64\usr\bin;%PATH%
@@ -52,14 +56,8 @@ before_build:
 
 build_script:
   - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\projects\software\message %CMAKEARGS%
-  - cmake --build build --target help
-  #- cmake --build build --target test -- %BUILDFLAGS%
-  - cmake --build build --target install -- %BUILDFLAGS%
-  - cmake --build build --target package -- %BUILDFLAGS%
+  - cmake --build build --target install --config Release -- %BUILDFLAGS%
+  - cmake --build build --target %TESTING_TARGET% --config Release
+  - cmake --build build --target package --config Release -- %BUILDFLAGS%
 
 deploy: off
-
-cache:
-  - C:\msys64\%MSYSTEM%\bin -> install.bat
-  - C:\msys64\usr\bin -> install.bat
-  - c:\tools\vcpkg\installed\ -> install.bat

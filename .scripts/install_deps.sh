@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eu -o pipefail
 
 Ninja_URL=""
 CMake_VERSION="3.11.2"
@@ -14,10 +14,10 @@ if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     echo "-- CMake $CMake_VERSION FOUND in cache"
   else
     echo "-- CMake $CMake_VERSION NOT FOUND in cache"
-    cd $HOME/Deps
+    cd "$HOME"/Deps
     mkdir -p cmake
     curl -Ls $CMake_URL | tar -xz -C cmake --strip-components=1
-    cd $TRAVIS_BUILD_DIR
+    cd "$TRAVIS_BUILD_DIR"
   fi
   echo "-- Done with CMake"
 elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
@@ -34,11 +34,11 @@ if [[ -f $HOME/Deps/ninja/ninja ]]; then
   echo "-- Ninja FOUND in cache"
 else
   echo "-- Ninja NOT FOUND in cache"
-  cd $HOME/Deps
+  cd "$HOME"/Deps
   mkdir -p ninja
   curl -Ls $Ninja_URL | tar -xz -C ninja --strip-components=1
-  cd $TRAVIS_BUILD_DIR
+  cd "$TRAVIS_BUILD_DIR"
 fi
 echo "-- Done with Ninja"
 
-cd $TRAVIS_BUILD_DIR
+cd "$TRAVIS_BUILD_DIR"

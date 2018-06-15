@@ -60,7 +60,7 @@ before_script:
 script:
   - ./.scripts/report_versions.sh
   - cmake -H. -Bbuild -G"$GENERATOR" -DCMAKE_INSTALL_PREFIX=$HOME/Software/message
-  - cmake --build build --target help -- $BUILDFLAGS
   - cmake --build build --target install -- $BUILDFLAGS
+  - cmake --build build --target test
   - cmake --build build --target package_source -- $BUILDFLAGS
   - cmake --build build --target package -- $BUILDFLAGS

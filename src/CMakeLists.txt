@@ -1,31 +1,25 @@
-add_library(message-objs OBJECT "")
-target_sources(message-objs
-  PRIVATE
-    Message.cpp
-  PUBLIC
-    Message.hpp
-  )
-# Remove dependency on UUID if on Windows
-if(WIN32)
-  target_compile_definitions(message-objs
-    PUBLIC
-      EXCLUDE_UUID
-      message_objs_EXPORTS
-    )
-else()
-  find_package(PkgConfig REQUIRED QUIET)
-  pkg_search_module(UUID REQUIRED uuid IMPORTED_TARGET)
+# Search for pkg-config and UUID
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+  pkg_search_module(UUID uuid IMPORTED_TARGET)
   if(UUID_FOUND)
     message(STATUS "Found libuuid")
   endif()
-  target_compile_definitions(message-objs
-    PUBLIC
-      message_objs_EXPORTS
-    )
 endif()
 
+# <<< Build targets >>>
+
+add_library(message "")
+target_sources(message
+  PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Message.cpp
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/Message.hpp>
+    $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}/message/Message.hpp>
+  )
+
 include(GenerateExportHeader)
-generate_export_header(message-objs
+generate_export_header(message
   BASE_NAME "message"
   EXPORT_MACRO_NAME "message_EXPORT"
   EXPORT_FILE_NAME "messageExport.h"
@@ -35,88 +29,64 @@ generate_export_header(message-objs
   NO_DEPRECATED_MACRO_NAME "message_NO_DEPRECATED"
   DEFINE_NO_DEPRECATED
   )
-set_target_properties(message-objs
+
+set_target_properties(message
   PROPERTIES
     POSITION_INDEPENDENT_CODE 1
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN 1
-    PUBLIC_HEADER "Message.hpp;${CMAKE_CURRENT_BINARY_DIR}/messageExport.h"
-    )
-target_include_directories(message-objs
-  PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR}
-  )
-
-add_library(message-static STATIC $<TARGET_OBJECTS:message-objs>)
-target_link_libraries(message-static
-  PUBLIC
-    $<$<NOT:$<BOOL:${WIN32}>>:PkgConfig::UUID>
-  )
-target_compile_definitions(message-static
-  INTERFACE
-    $<INSTALL_INTERFACE:USING_message>
-  PRIVATE
-    message_STATIC_DEFINE
-  )
-target_include_directories(message-static
-  INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-    $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
-  )
-set_target_properties(message-static
-  PROPERTIES
-    OUTPUT_NAME "message"
-    PUBLIC_HEADER "Message.hpp;${CMAKE_CURRENT_BINARY_DIR}/messageExport.h"
-  )
-install(
-  TARGETS
-    message-static
-  EXPORT
-    messageTargets-static
-  ARCHIVE
-    DESTINATION ${INSTALL_LIBDIR}
-    COMPONENT lib
-  PUBLIC_HEADER
-    DESTINATION ${INSTALL_INCLUDEDIR}/message
-    COMPONENT dev
-  )
-install(
-  EXPORT
-    messageTargets-static
-  NAMESPACE
-    "message::"
-  DESTINATION
-    ${INSTALL_CMAKEDIR}
-  COMPONENT
-    dev
-  )
-
-add_library(message-shared SHARED $<TARGET_OBJECTS:message-objs>)
-target_link_libraries(message-shared
-  PUBLIC
-    $<$<NOT:$<BOOL:${WIN32}>>:PkgConfig::UUID>
-  )
-target_compile_definitions(message-shared
-  INTERFACE
-    $<INSTALL_INTERFACE:USING_message>
-  )
-target_include_directories(message-shared
-  INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-    $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
-  )
-set_target_properties(message-shared
-  PROPERTIES
     MACOSX_RPATH ON
     SOVERSION ${PROJECT_VERSION_MAJOR}
     OUTPUT_NAME "message"
     PUBLIC_HEADER "Message.hpp;${CMAKE_CURRENT_BINARY_DIR}/messageExport.h"
   )
+
+target_compile_definitions(message
+  PUBLIC
+    message_EXPORTS
+    $<$<BOOL:${UUID_FOUND}>:HAVE_UUID>
+    $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:message_STATIC_DEFINE>
+  INTERFACE
+    $<INSTALL_INTERFACE:USING_message>
+  )
+
+target_include_directories(message
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
+  )
+
+target_link_libraries(message
+  PUBLIC
+    $<$<BOOL:${UUID_FOUND}>:PkgConfig::UUID>
+  )
+
+add_executable(hello-world hello-world.cpp)
+target_link_libraries(hello-world
+  PUBLIC
+    message
+  )
+
+# RPATH fixing
+set_target_properties(hello-world
+  PROPERTIES
+    MACOSX_RPATH ON
+    SKIP_BUILD_RPATH OFF
+    BUILD_WITH_INSTALL_RPATH OFF
+    INSTALL_RPATH "${message_RPATH}"
+    INSTALL_RPATH_USE_LINK_PATH ON
+  )
+
+# <<< Install and export targets >>>
+
 install(
   TARGETS
-    message-shared
+    message
   EXPORT
-    messageTargets-shared
+    messageTargets
+  ARCHIVE
+    DESTINATION ${INSTALL_LIBDIR}
+    COMPONENT lib
   RUNTIME
     DESTINATION ${INSTALL_BINDIR}
     COMPONENT bin
@@ -127,9 +97,10 @@ install(
     DESTINATION ${INSTALL_INCLUDEDIR}/message
     COMPONENT dev
   )
+
 install(
   EXPORT
-    messageTargets-shared
+    messageTargets
   NAMESPACE
     "message::"
   DESTINATION
@@ -138,20 +109,6 @@ install(
     dev
   )
 
-add_executable(hello-world hello-world.cpp)
-target_link_libraries(hello-world
-  PUBLIC
-    message-shared
-  )
-# RPATH fixing
-set_target_properties(hello-world
-  PROPERTIES
-    MACOSX_RPATH ON
-    SKIP_BUILD_RPATH OFF
-    BUILD_WITH_INSTALL_RPATH OFF
-    INSTALL_RPATH "${message_RPATH}"
-    INSTALL_RPATH_USE_LINK_PATH ON
-  )
 install(
   TARGETS
     hello-world
@@ -161,6 +118,7 @@ install(
     DESTINATION ${INSTALL_BINDIR}
     COMPONENT bin
   )
+
 install(
   EXPORT
     messageTargets-hello-world
@@ -192,6 +150,8 @@ install(
   DESTINATION
     ${INSTALL_CMAKEDIR}
   )
+
+# <<< Package project >>>
 
 set(CPACK_PACKAGE_NAME "message")
 set(CPACK_PACKAGE_VENDOR "CMakeCookbook")

@@ -1,9 +1,13 @@
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
 
 project(message
   LANGUAGES CXX
   VERSION 1.0.0
   )
+
+option(BUILD_SHARED_LIBS "Whether to build shared libraries" ON)
+
+# <<< General set up >>>
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -53,3 +57,7 @@ endif()
 file(TO_NATIVE_PATH "${_rpath}/${INSTALL_LIBDIR}" message_RPATH)
 
 add_subdirectory(src)
+
+enable_testing()
+
+add_subdirectory(tests)
