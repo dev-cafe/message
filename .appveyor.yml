@@ -52,6 +52,7 @@ before_build:
 
 build_script:
   - cmake -H. -Bbuild -G"%GENERATOR%" -DCMAKE_INSTALL_PREFIX=C:\projects\software\message %CMAKEARGS%
+  - cmake --build build --target help
   #- cmake --build build --target test -- %BUILDFLAGS%
   - cmake --build build --target install -- %BUILDFLAGS%
   - cmake --build build --target package -- %BUILDFLAGS%
