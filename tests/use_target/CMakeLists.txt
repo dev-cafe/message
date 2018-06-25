@@ -69,4 +69,3 @@ if(WIN32)
       ENVIRONMENT "PATH=${_locations}"
     )
 endif()
-
