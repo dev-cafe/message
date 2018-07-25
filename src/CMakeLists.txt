@@ -9,13 +9,14 @@ endif()
 
 # <<< Build targets >>>
 
-add_library(message SHARED "")
+# SHARED library
+add_library(message-shared SHARED "")
 
 include(GenerateExportHeader)
-generate_export_header(message
+generate_export_header(message-shared
   BASE_NAME "message"
   EXPORT_MACRO_NAME "message_EXPORT"
-  EXPORT_FILE_NAME "messageExport.h"
+  EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"
   DEPRECATED_MACRO_NAME "message_DEPRECATED"
   NO_EXPORT_MACRO_NAME "message_NO_EXPORT"
   STATIC_DEFINE "message_STATIC_DEFINE"
@@ -23,56 +24,98 @@ generate_export_header(message
   DEFINE_NO_DEPRECATED
   )
 
-target_sources(message
+target_sources(message-shared
   PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/Message.cpp
   )
 
-set_target_properties(message
-  PROPERTIES
-    POSITION_INDEPENDENT_CODE 1
-    CXX_VISIBILITY_PRESET hidden
-    VISIBILITY_INLINES_HIDDEN 1
-    OUTPUT_NAME "message"
-    PUBLIC_HEADER "Message.hpp;${CMAKE_CURRENT_BINARY_DIR}/messageExport.h"
-    MACOSX_RPATH ON
-    SOVERSION ${PROJECT_VERSION_MAJOR}
-  )
-
-target_compile_definitions(message
+target_compile_definitions(message-shared
   PUBLIC
-    message_EXPORTS
     $<$<BOOL:${UUID_FOUND}>:HAVE_UUID>
   INTERFACE
     $<INSTALL_INTERFACE:USING_message>
   )
 
-target_include_directories(message
+target_include_directories(message-shared
   PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}>
     $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
   )
 
-target_link_libraries(message
+target_link_libraries(message-shared
   PUBLIC
     $<$<BOOL:${UUID_FOUND}>:PkgConfig::UUID>
   )
 
+set_target_properties(message-shared
+  PROPERTIES
+    POSITION_INDEPENDENT_CODE 1
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN 1
+    MACOSX_RPATH ON
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    OUTPUT_NAME "message"
+    PUBLIC_HEADER "Message.hpp;${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"
+  )
+
+# STATIC library
+
+add_library(message-static STATIC "")
+
+target_sources(message-static
+  PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Message.cpp
+  )
+
+target_compile_definitions(message-static
+  PRIVATE
+    message_STATIC_DEFINE
+  PUBLIC
+    $<$<BOOL:${UUID_FOUND}>:HAVE_UUID>
+  INTERFACE
+    $<INSTALL_INTERFACE:USING_message>
+  )
+
+target_include_directories(message-static
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}>
+    $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
+  )
+
+target_link_libraries(message-static
+  PUBLIC
+    $<$<BOOL:${UUID_FOUND}>:PkgConfig::UUID>
+  )
+
+set_target_properties(message-static
+  PROPERTIES
+    POSITION_INDEPENDENT_CODE 1
+    OUTPUT_NAME "message_s"
+    PUBLIC_HEADER "Message.hpp;${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"
+  )
+
 # EXECUTABLE
 
-add_executable(hello-world hello-world.cpp)
+add_executable(hello-world_wDSO hello-world.cpp)
 
-target_link_libraries(hello-world
+target_link_libraries(hello-world_wDSO
   PUBLIC
-    message
+    message-shared
   )
 
 # RPATH fixing
-set_target_properties(hello-world
+set_target_properties(hello-world_wDSO
   PROPERTIES
     MACOSX_RPATH ON
     SKIP_BUILD_RPATH OFF
     BUILD_WITH_INSTALL_RPATH OFF
     INSTALL_RPATH "${message_RPATH}"
     INSTALL_RPATH_USE_LINK_PATH ON
+  )
+
+add_executable(hello-world_wAR hello-world.cpp)
+
+target_link_libraries(hello-world_wAR
+  PUBLIC
+    message-static
   )

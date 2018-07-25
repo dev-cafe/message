@@ -6,8 +6,6 @@ project(message
   VERSION 1.0.0
   )
 
-option(BUILD_SHARED_LIBS "Whether to build shared libraries" ON)
-
 # <<< General set up >>>
 
 set(CMAKE_CXX_STANDARD 11)
