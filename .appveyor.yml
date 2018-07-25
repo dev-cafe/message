@@ -27,25 +27,16 @@ environment:
       PACKAGE_SOURCE: "1"
     - GENERATOR: "Visual Studio 15 2017"
       BUILDFLAGS: "/verbosity:normal"
-      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      CMAKEARGS: "-A %PLATFORM% -DCMAKE_TOOLCHAIN_FILE=C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake"
       TESTING_TARGET: "RUN_TESTS"
     - GENERATOR: "Ninja"
       BUILDFLAGS: "-v"
       CMAKEARGS: ""
       TESTING_TARGET: "test"
       PACKAGE_SOURCE: "1"
-    - GENERATOR: "MSYS Makefiles"
-      ANACONDA_TESTS_ONLY: "1"
-      BUILDFLAGS: "VERBOSE=1"
-      CMAKEARGS: ""
-    - GENERATOR: "Visual Studio 15 2017"
-      ANACONDA_TESTS_ONLY: "1"
-      BUILDFLAGS: "/verbosity:normal"
-      CMAKEARGS: "-DCMAKE_TOOLCHAIN_FILE=C:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake"
-      TESTING_TARGET: "RUN_TESTS"
 
 init:
-  - set PATH=C:\msys64\%MSYSTEM%\bin;C:\msys64\usr\bin;%PATH%
+  - set PATH=C:\msys64\MINGW64\bin;C:\msys64\usr\bin;%PATH%
   - set PATH=C:\Python36;C:\Python36\Scripts;%PATH%
   # Remove Python 2.7 from path
   - set PATH=%PATH:C:\Python27;=%
@@ -60,14 +51,13 @@ before_build:
   - cmake --version
 
 build_script:
-  - cmake -A %PLATFORM%
-          -H. -Bbuild
+  - cmake -H. -Bbuild
           -G"%GENERATOR%"
           -DCMAKE_BUILD_TYPE=%CONFIGURATION%
           -DCMAKE_INSTALL_PREFIX=C:\projects\software\message
           %CMAKEARGS%
+  # FIXME Re-add --target install
   - cmake --build build
-          --target install
           --config %CONFIGURATION%
           -- %BUILDFLAGS%
   - cmake --build build

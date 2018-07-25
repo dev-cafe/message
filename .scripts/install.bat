@@ -14,9 +14,6 @@ if "%nonVSGenerator%"=="true" (
   rem --ask=127 is taken from https://github.com/appveyor/ci/issues/2074#issuecomment-364842018
   bash -c "pacman -Syuu --needed --noconfirm --ask=127"
 
-  rem we will run the tests inside pipenv
-  bash -c "pip install pipenv"
-
   rem search for packages with
   rem bash -lc "pacman -Ss boost"
 

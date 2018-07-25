@@ -1,12 +1,12 @@
 add_test(
-  NAME test_shared
+  NAME test_hello-world
   COMMAND $<TARGET_FILE:hello-world>
   )
 
-add_test(
-  NAME test_static
-  COMMAND $<TARGET_FILE:hello-world-static>
-  )
+#add_test(
+#  NAME test_static
+#  COMMAND $<TARGET_FILE:hello-world-static>
+#  )
 
 add_test(
   NAME use-target_configure
