@@ -68,9 +68,8 @@ target_sources(message-static
   )
 
 target_compile_definitions(message-static
-  PRIVATE
-    message_STATIC_DEFINE
   PUBLIC
+    message_STATIC_DEFINE
     $<$<BOOL:${UUID_FOUND}>:HAVE_UUID>
   INTERFACE
     $<INSTALL_INTERFACE:USING_message>
