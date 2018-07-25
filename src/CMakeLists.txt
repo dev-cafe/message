@@ -59,7 +59,6 @@ set_target_properties(message-shared
   )
 
 # STATIC library
-
 add_library(message-static STATIC "")
 
 target_sources(message-static
@@ -93,8 +92,7 @@ set_target_properties(message-static
     PUBLIC_HEADER "Message.hpp;${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"
   )
 
-# EXECUTABLE
-
+# EXECUTABLES
 add_executable(hello-world_wDSO hello-world.cpp)
 
 target_link_libraries(hello-world_wDSO
@@ -117,4 +115,60 @@ add_executable(hello-world_wAR hello-world.cpp)
 target_link_libraries(hello-world_wAR
   PUBLIC
     message-static
+  )
+
+# <<< Install and export targets >>>
+
+install(
+  TARGETS
+    message-shared
+    message-static
+    hello-world_wDSO
+    hello-world_wAR
+  EXPORT
+    messageTargets
+  ARCHIVE
+    DESTINATION ${INSTALL_LIBDIR}
+    COMPONENT lib
+  RUNTIME
+    DESTINATION ${INSTALL_BINDIR}
+    COMPONENT bin
+  LIBRARY
+    DESTINATION ${INSTALL_LIBDIR}
+    COMPONENT lib
+  PUBLIC_HEADER
+    DESTINATION ${INSTALL_INCLUDEDIR}/message
+    COMPONENT dev
+  )
+
+install(
+  EXPORT
+    messageTargets
+  NAMESPACE
+    "message::"
+  DESTINATION
+    ${INSTALL_CMAKEDIR}
+  COMPONENT
+    dev
+  )
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/messageConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+  )
+
+configure_package_config_file(
+  ${PROJECT_SOURCE_DIR}/cmake/messageConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/messageConfig.cmake
+  INSTALL_DESTINATION ${INSTALL_CMAKEDIR}
+  )
+
+install(
+  FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/messageConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/messageConfigVersion.cmake
+  DESTINATION
+    ${INSTALL_CMAKEDIR}
   )
