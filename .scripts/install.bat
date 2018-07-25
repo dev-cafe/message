@@ -24,7 +24,6 @@ if "%nonVSGenerator%"=="true" (
   echo "Using VS generator %GENERATOR%"
   echo "Let's get VcPkg working"
 
-  vcpkg install eigen3 --triplet x64-windows
   cd c:\tools\vcpkg
   vcpkg integrate install
   cd %APPVEYOR_BUILD_FOLDER%
