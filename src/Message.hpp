@@ -5,7 +5,7 @@
 
 #include "messageExport.h"
 
-class message_EXPORT Message {
+class message_NO_EXPORT Message {
 public:
   Message(const std::string &m) : message_(m) {}
 

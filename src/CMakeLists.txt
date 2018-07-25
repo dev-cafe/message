@@ -9,14 +9,8 @@ endif()
 
 # <<< Build targets >>>
 
-add_library(message "")
-target_sources(message
-  PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/Message.cpp
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/Message.hpp>
-    $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}/message/Message.hpp>
-  )
+# OBJECT library
+add_library(message OBJECT "")
 
 include(GenerateExportHeader)
 generate_export_header(message
@@ -30,15 +24,21 @@ generate_export_header(message
   DEFINE_NO_DEPRECATED
   )
 
+target_sources(message
+  PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Message.cpp
+  )
+
+target_include_directories(message
+  PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  )
+
 set_target_properties(message
   PROPERTIES
     POSITION_INDEPENDENT_CODE 1
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN 1
-    MACOSX_RPATH ON
-    SOVERSION ${PROJECT_VERSION_MAJOR}
-    OUTPUT_NAME "message"
-    PUBLIC_HEADER "Message.hpp;${CMAKE_CURRENT_BINARY_DIR}/messageExport.h"
   )
 
 target_compile_definitions(message
@@ -50,21 +50,100 @@ target_compile_definitions(message
     $<INSTALL_INTERFACE:USING_message>
   )
 
-target_include_directories(message
+# SHARED library
+
+add_library(message-shared SHARED $<TARGET_OBJECTS:message>)
+
+set_target_properties(message-shared
+  PROPERTIES
+    MACOSX_RPATH ON
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    OUTPUT_NAME "message"
+    PUBLIC_HEADER "Message.hpp;${CMAKE_CURRENT_BINARY_DIR}/messageExport.h"
+  )
+
+target_compile_definitions(message-shared
+  PUBLIC
+    message_EXPORTS
+  )
+
+target_include_directories(message-shared
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
   )
 
-target_link_libraries(message
+target_link_libraries(message-shared
   PUBLIC
     $<$<BOOL:${UUID_FOUND}>:PkgConfig::UUID>
   )
 
+# STATIC library from object files
+
+add_library(message-static STATIC $<TARGET_OBJECTS:message>)
+
+set_target_properties(message-static
+  PROPERTIES
+    OUTPUT_NAME "message_s"
+    PUBLIC_HEADER "Message.hpp;${CMAKE_CURRENT_BINARY_DIR}/messageExport.h"
+  )
+
+target_compile_definitions(message-static
+  PUBLIC
+    message_STATIC_DEFINE
+  INTERFACE
+    $<INSTALL_INTERFACE:USING_message>
+  )
+
+target_include_directories(message-static
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
+  )
+
+target_link_libraries(message-static
+  PUBLIC
+    $<$<BOOL:${UUID_FOUND}>:PkgConfig::UUID>
+  )
+
+# STATIC library from sources
+
+add_library(message-static2 STATIC Message.cpp)
+
+set_target_properties(message-static2
+  PROPERTIES
+    POSITION_INDEPENDENT_CODE 1
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN 1
+    OUTPUT_NAME "message_s2"
+    PUBLIC_HEADER "Message.hpp;${CMAKE_CURRENT_BINARY_DIR}/messageExport.h"
+  )
+
+target_compile_definitions(message-static2
+  PUBLIC
+    message_STATIC_DEFINE
+    $<$<BOOL:${UUID_FOUND}>:HAVE_UUID>
+  INTERFACE
+    $<INSTALL_INTERFACE:USING_message>
+  )
+
+target_include_directories(message-static2
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:${INSTALL_INCLUDEDIR}>
+  )
+
+target_link_libraries(message-static2
+  PUBLIC
+    $<$<BOOL:${UUID_FOUND}>:PkgConfig::UUID>
+  )
+
+# EXECUTABLE
+
 add_executable(hello-world hello-world.cpp)
 target_link_libraries(hello-world
   PUBLIC
-    message
+    message-shared
   )
 
 # RPATH fixing
@@ -77,11 +156,25 @@ set_target_properties(hello-world
     INSTALL_RPATH_USE_LINK_PATH ON
   )
 
+add_executable(hello-world-static hello-world.cpp)
+
+target_link_libraries(hello-world-static
+  PUBLIC
+    message-static
+  )
+
+add_executable(hello-world-static2 hello-world.cpp)
+
+target_link_libraries(hello-world-static2
+  PUBLIC
+    message-static2
+  )
+
 # <<< Install and export targets >>>
 
 install(
   TARGETS
-    message
+    message-shared
   EXPORT
     messageTargets
   ARCHIVE
@@ -150,49 +243,3 @@ install(
   DESTINATION
     ${INSTALL_CMAKEDIR}
   )
-
-# <<< Package project >>>
-
-set(CPACK_PACKAGE_NAME "message")
-set(CPACK_PACKAGE_VENDOR "CMakeCookbook")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/INSTALL.md")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "message: a small messaging library")
-set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
-set(CPACK_SOURCE_IGNORE_FILES "/build/;/.git/;.gitignore;/external/")
-
-set(CPACK_GENERATOR "ZIP;TGZ")
-set(CPACK_SOURCE_GENERATOR "ZIP;TGZ")
-
-# Decide binary packaging
-if(UNIX)
-  if(CMAKE_SYSTEM_NAME MATCHES Linux)
-    list(APPEND CPACK_GENERATOR "DEB")
-    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "robertodr")
-    set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "uuid-dev")
-
-    list(APPEND CPACK_GENERATOR "RPM")
-    set(CPACK_RPM_PACKAGE_RELEASE "1")
-    set(CPACK_RPM_PACKAGE_LICENSE "MIT")
-    set(CPACK_RPM_PACKAGE_REQUIRES "uuid-devel")
-  endif()
-endif()
-if(WIN32 OR MINGW)
-  list(APPEND CPACK_GENERATOR "NSIS")
-  set(CPACK_NSIS_PACKAGE_NAME "message")
-  set(CPACK_NSIS_CONTACT "robertdr")
-  set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-endif()
-if(APPLE)
-  list(APPEND CPACK_GENERATOR "Bundle")
-  set(CPACK_BUNDLE_NAME "message")
-  configure_file(${PROJECT_SOURCE_DIR}/cmake/Info.plist.in Info.plist @ONLY)
-  set(CPACK_BUNDLE_PLIST ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
-  set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/cmake/coffee.icns)
-endif()
-message(STATUS "CPack generators: ${CPACK_GENERATOR}")
-
-include(CPack)

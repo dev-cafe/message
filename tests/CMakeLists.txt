@@ -1,6 +1,11 @@
 add_test(
-  NAME test_hello-world
+  NAME test_shared
   COMMAND $<TARGET_FILE:hello-world>
+  )
+
+add_test(
+  NAME test_static
+  COMMAND $<TARGET_FILE:hello-world-static>
   )
 
 add_test(
