@@ -16,6 +16,7 @@ add_test(
                      -G${CMAKE_GENERATOR}
                      -Dmessage_DIR=${CMAKE_INSTALL_PREFIX}/${INSTALL_CMAKEDIR}
                      -DCMAKE_BUILD_TYPE=$<CONFIGURATION>
+                     $ENV{CMAKEARGS}
   )
 set_tests_properties(use-target_configure
   PROPERTIES
