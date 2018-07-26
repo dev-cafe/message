@@ -100,7 +100,16 @@ target_link_libraries(hello-world_wDSO
     message-shared
   )
 
-# RPATH fixing
+# Prepare RPATH
+
+file(RELATIVE_PATH _rel ${CMAKE_INSTALL_PREFIX}/${INSTALL_BINDIR} ${CMAKE_INSTALL_PREFIX})
+if(APPLE)
+  set(_rpath "@loader_path/${_rel}")
+else()
+  set(_rpath "\$ORIGIN/${_rel}")
+endif()
+file(TO_NATIVE_PATH "${_rpath}/${INSTALL_LIBDIR}" message_RPATH)
+
 set_target_properties(hello-world_wDSO
   PROPERTIES
     MACOSX_RPATH ON
