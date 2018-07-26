@@ -42,7 +42,7 @@ set(INSTALL_CMAKEDIR ${DEF_INSTALL_CMAKEDIR} CACHE PATH "Installation directory 
 # Report to user
 foreach(p LIB BIN INCLUDE CMAKE)
   file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_${p}DIR} _path )
-  message(STATUS "Installing ${p} to ${_path}")
+  message(STATUS "Installing ${p} components to ${_path}")
   unset(_path)
 endforeach()
 
