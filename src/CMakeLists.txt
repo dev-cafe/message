@@ -55,6 +55,7 @@ set_target_properties(message-shared
     MACOSX_RPATH ON
     SOVERSION ${PROJECT_VERSION_MAJOR}
     OUTPUT_NAME "message"
+    DEBUG_POSTFIX "_d"
     PUBLIC_HEADER "Message.hpp;${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"
   )
 
@@ -88,7 +89,9 @@ target_link_libraries(message-static
 set_target_properties(message-static
   PROPERTIES
     POSITION_INDEPENDENT_CODE 1
-    OUTPUT_NAME "message_s"
+    ARCHIVE_OUTPUT_NAME "message"
+    DEBUG_POSTFIX "_sd"
+    RELEASE_POSTFIX "_s"
     PUBLIC_HEADER "Message.hpp;${CMAKE_BINARY_DIR}/${INSTALL_INCLUDEDIR}/messageExport.h"
   )
 
